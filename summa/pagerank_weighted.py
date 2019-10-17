@@ -12,6 +12,7 @@ def pagerank_weighted(graph, initial_value=None, damping=0.85):
 
     iteration_quantity = 0
     for iteration_number in range(100):
+        print(f'Running pagerank iteration {iteration_number}')
         iteration_quantity += 1
         convergence_achieved = 0
         for i in graph.nodes():

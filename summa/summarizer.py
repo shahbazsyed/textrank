@@ -4,15 +4,20 @@ from .pagerank_weighted import pagerank_weighted_scipy as _pagerank
 from .preprocessing.textcleaner import clean_text_by_sentences as _clean_text_by_sentences
 from .commons import build_graph as _build_graph
 from .commons import remove_unreachable_nodes as _remove_unreachable_nodes
+from .embeddings import get_embedding_similarity as _get_embedding_similarity
 
 
-def _set_graph_edge_weights(graph):
+def _set_graph_edge_weights(graph, embedding_similarity):
     for sentence_1 in graph.nodes():
         for sentence_2 in graph.nodes():
 
             edge = (sentence_1, sentence_2)
             if sentence_1 != sentence_2 and not graph.has_edge(edge):
-                similarity = _get_similarity(sentence_1, sentence_2)
+                similarity = 0
+                if embedding_similarity:
+                    similarity = _get_embedding_similarity(sentence_1, sentence_2)
+                else:
+                    similarity = _get_similarity(sentence_1, sentence_2)
                 if similarity != 0:
                     graph.add_edge(edge, similarity)
 
@@ -42,7 +47,8 @@ def _get_similarity(s1, s2):
     words_sentence_one = s1.split()
     words_sentence_two = s2.split()
 
-    common_word_count = _count_common_words(words_sentence_one, words_sentence_two)
+    common_word_count = _count_common_words(
+        words_sentence_one, words_sentence_two)
 
     log_s1 = log10(len(words_sentence_one))
     log_s2 = log10(len(words_sentence_two))
@@ -109,16 +115,18 @@ def _extract_most_important_sentences(sentences, ratio, words):
         return _get_sentences_with_word_count(sentences, words)
 
 
-def summarize(text, ratio=0.2, words=None, language="english", split=False, scores=False, additional_stopwords=None):
+def summarize(text, ratio=0.2, words=None, embedding_similarity=False, language="english", split=False, scores=False, additional_stopwords=None):
     if not isinstance(text, str):
         raise ValueError("Text parameter must be a Unicode object (str)!")
 
     # Gets a list of processed sentences.
-    sentences = _clean_text_by_sentences(text, language, additional_stopwords)
+    print(f'Embedding similarity enabled ? {embedding_similarity}')
+    sentences = _clean_text_by_sentences(
+        text, language, embedding_similarity, additional_stopwords)
 
     # Creates the graph and calculates the similarity coefficient for every pair of nodes.
     graph = _build_graph([sentence.token for sentence in sentences])
-    _set_graph_edge_weights(graph)
+    _set_graph_edge_weights(graph, embedding_similarity)
 
     # Remove all nodes with all edges weights equal to zero.
     _remove_unreachable_nodes(graph)
@@ -134,7 +142,8 @@ def summarize(text, ratio=0.2, words=None, language="english", split=False, scor
     _add_scores_to_sentences(sentences, pagerank_scores)
 
     # Extracts the most important sentences with the selected criterion.
-    extracted_sentences = _extract_most_important_sentences(sentences, ratio, words)
+    extracted_sentences = _extract_most_important_sentences(
+        sentences, ratio, words)
 
     # Sorts the extracted sentences by apparition order in the original text.
     extracted_sentences.sort(key=lambda s: s.index)
@@ -142,10 +151,11 @@ def summarize(text, ratio=0.2, words=None, language="english", split=False, scor
     return _format_results(extracted_sentences, split, scores)
 
 
-def get_graph(text, language="english"):
-    sentences = _clean_text_by_sentences(text, language)
+def get_graph(text, language="english", embedding_similarity=False):
+    sentences = _clean_text_by_sentences(
+        text, language, embedding_similarity=embedding_similarity)
 
     graph = _build_graph([sentence.token for sentence in sentences])
-    _set_graph_edge_weights(graph)
+    _set_graph_edge_weights(graph, embedding_similarity)
 
     return graph

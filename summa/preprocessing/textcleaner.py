@@ -109,9 +109,11 @@ def apply_filters(sentence, filters):
     return sentence
 
 
-def filter_words(sentences):
-    filters = [lambda x: x.lower(), strip_numeric, strip_punctuation, remove_stopwords,
-               stem_sentence]
+def filter_words(sentences, embedding_similarity):
+    filters = [lambda x: x.lower(), strip_numeric, strip_punctuation, remove_stopwords]
+    if not embedding_similarity:
+        print(f'Applying stemming')
+        filters.append(stem_sentence)
     apply_filters_to_token = lambda token: apply_filters(token, filters)
     return list(map(apply_filters_to_token, sentences))
 
@@ -158,23 +160,22 @@ def merge_syntactic_units(original_units, filtered_units, tags=None):
     return units
 
 
-def clean_text_by_sentences(text, language="english", additional_stopwords=None):
+def clean_text_by_sentences(text, language="english", embedding_similarity=False, additional_stopwords=None):
     """ Tokenizes a given text into sentences, applying filters and lemmatizing them.
     Returns a SyntacticUnit list. """
     init_textcleanner(language, additional_stopwords)
     original_sentences = split_sentences(text)
-    filtered_sentences = filter_words(original_sentences)
-
+    filtered_sentences = filter_words(original_sentences, embedding_similarity)
     return merge_syntactic_units(original_sentences, filtered_sentences)
 
 
-def clean_text_by_word(text, language="english", deacc=False, additional_stopwords=None):
+def clean_text_by_word(text, language="english", embedding_similarity = False, deacc=False, additional_stopwords=None):
     """ Tokenizes a given text into words, applying filters and lemmatizing them.
     Returns a dict of word -> syntacticUnit. """
     init_textcleanner(language, additional_stopwords)
     text_without_acronyms = replace_with_separator(text, "", [AB_ACRONYM_LETTERS])
     original_words = list(tokenize(text_without_acronyms, lowercase=True, deacc=deacc))
-    filtered_words = filter_words(original_words)
+    filtered_words = filter_words(original_words, embedding_similarity)
     if HAS_PATTERN:
         tags = tag(" ".join(original_words))  # tag needs the context of the words in the text
     else:
