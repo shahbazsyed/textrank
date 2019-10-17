@@ -1,10 +1,13 @@
 from flair.embeddings import WordEmbeddings, FlairEmbeddings, DocumentPoolEmbeddings, Sentence
 import torch.nn as nn
 
+#flair_embedding_forward = FlairEmbeddings('news-forward')
+#flair_embedding_backward = FlairEmbeddings('news-backward')
 
-flair_embedding_forward = FlairEmbeddings('news-forward')
-flair_embedding_backward = FlairEmbeddings('news-backward')
-embedding = DocumentPoolEmbeddings([flair_embedding_forward, flair_embedding_backward])
+fasttext_embeddings_web = WordEmbeddings('en-crawl')
+fasttext_embeddings_news = WordEmbeddings('en-news')
+
+embedding = DocumentPoolEmbeddings([fasttext_embeddings_news, fasttext_embeddings_web])
 
 cos = nn.CosineSimilarity(dim=0)
 
