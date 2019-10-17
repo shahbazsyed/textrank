@@ -23,4 +23,4 @@ def _get_cosine_similarity(vec_1, vec_2):
 def get_embedding_similarity(sentence_1, sentence_2):
     vec_1 = _get_embedding(sentence_1)
     vec_2 = _get_embedding(sentence_2)
-    return _get_cosine_similarity(vec_1, vec_2)
+    return _get_cosine_similarity(vec_1, vec_2) 
