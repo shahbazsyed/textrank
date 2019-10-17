@@ -1,4 +1,4 @@
-from summa import fast_summarizer
+from summa import fast_summarizer, summarizer
 import glob
 
 # documents = glob.glob('data/*.txt')
@@ -15,7 +15,7 @@ import glob
 #             print("Skipping empty summary")
 
 text = """
-The Charlie Hebdo cartoonists were smarter theologians than the jihadis
+The Charlie Hebdo cartoonists were smarter theologians than the jihadis.
 
 Rather disturbingly, one word seems to connect the activity of the Paris terrorists and that of the Charlie Hebdo cartoonists: iconoclasm. I say disturbingly, because pointing out some common ground may be seen as blurring the crucial distinction between murderous bastards and innocent satirists. 
 
@@ -32,8 +32,11 @@ So I can see how some Christians might find disrespectful images of God a la Cha
 But, of course, these terrorists weren’t really interested in theology. They thought that Charlie Hebdo’s cartoonists were insulting their human tribe, a tribe they called fellow Muslims. And maybe they were. But whatever else was happening, it was the atheist cartoonists who were performing the religious function and the apparently believing Muslims who had forgotten their deepest religious insights. For any representation of the divine that leads people to murder each other deserves the maximum possible disrespect. 
 """
 
-summary = fast_summarizer.summarize(text, ratio=0.2, weight_function="embedding_similarity")
+ft_summary = fast_summarizer.summarize(text, ratio=0.4, weight_function="lexical_overlap")
+summary = summarizer.summarize(text, ratio=0.4)
 print("-"*50)
-print(summary.replace('\n',' '))
-
+print(summary.replace('\n', ' '))
+print('#' * 50)
+print(ft_summary.replace('\n',' '))
+print("-"*50)
         

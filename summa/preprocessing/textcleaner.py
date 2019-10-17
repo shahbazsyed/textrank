@@ -111,9 +111,9 @@ def apply_filters(sentence, filters):
 
 def filter_words(sentences, embedding_similarity):
     filters = [lambda x: x.lower(), strip_numeric, strip_punctuation, remove_stopwords]
-    if not embedding_similarity:
-        print(f'Applying stemming')
-        filters.append(stem_sentence)
+    # if not embedding_similarity:
+    #     print(f'Applying stemming')
+    #     filters.append(stem_sentence)
     apply_filters_to_token = lambda token: apply_filters(token, filters)
     return list(map(apply_filters_to_token, sentences))
 
